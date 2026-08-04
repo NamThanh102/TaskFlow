@@ -37,3 +37,6 @@ pnpm-debug.log*
 Thumbs.db
 tmp/
 temp/
+
+# Local docs
+000docs/

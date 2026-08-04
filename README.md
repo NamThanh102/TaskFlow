@@ -22,9 +22,6 @@ Kiến trúc hệ thống tách biệt độc lập giữa Backend (`be`) và Fr
 
 ```
 taskflow-mern/
-├── 000docs/                 # Tài liệu chi tiết về Schema và Seed data
-│   ├── schema.md            # Mô tả chi tiết các collection và quan hệ database
-│   └── seed.md              # Hướng dẫn và thông tin tài khoản demo
 ├── be/                      # Backend (Node.js + Express.js + MongoDB)
 │   ├── src/
 │   │   ├── config/          # Cấu hình kết nối MongoDB (db.js)
@@ -49,11 +46,6 @@ taskflow-mern/
 ├── .gitignore               # Cấu hình bỏ qua file nhạy cảm và node_modules duy nhất
 └── README.md                # Tài liệu hướng dẫn sử dụng dự án
 ```
-
-Tài liệu chi tiết kỹ thuật:
-- Xem cấu trúc Database Schema tại: [000docs/schema.md](000docs/schema.md)
-- Xem thông tin dữ liệu mẫu và tài khoản test tại: [000docs/seed.md](000docs/seed.md)
-
 ---
 
 ## 3. Hướng dẫn cài đặt và chạy dự án
