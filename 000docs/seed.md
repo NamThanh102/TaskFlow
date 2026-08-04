@@ -1,10 +1,10 @@
-# Du lieu mau (Seed Data)
+# Dữ liệu Mẫu (Seed Data)
 
-Tap lenh khoi tao du lieu mau nam tai: `be/src/utils/seedData.js`.
+Tệp tin khởi tạo dữ liệu mẫu nằm tại: `be/src/utils/seedData.js`.
 
-## 1. Huong dan chay Seeder
+## 1. Hướng dẫn chạy Seeder
 
-Mo terminal tai thu muc `be/`:
+Mở cửa sổ terminal tại thư mục `be/`:
 ```bash
 cd be
 npm run seed
@@ -12,51 +12,51 @@ npm run seed
 
 ---
 
-## 2. Thong tin Tai khoan Test
+## 2. Thông tin Tài khoản Test có sẵn
 
-| Truong | Gia tri |
+| Trường | Giá trị |
 | :--- | :--- |
 | **Email** | `nam.nguyen@ptit.edu.vn` |
-| **Mat khau** | `password123` |
-| **Vai tro** | `user` |
-| **Ho va ten** | Nguyen Thanh Nam |
+| **Mật khẩu** | `password123` |
+| **Vai trò** | `user` |
+| **Họ và tên** | Nguyễn Thành Nam |
 
-*(Trang dang nhap `LoginPage` co san nut "Auto Fill" de dien nhanh thong tin nay)*
-
----
-
-## 3. Danh sach Du an Mau duoc khoi tao
-
-1. **E-Commerce Microservices Platform** (Mau xanh duong `#2563eb`)
-   - Mo ta: Distributed shopping architecture with Express, MongoDB, and React client.
-   - Tong so task: 7 task dang hoat dong + 2 task mau trong Thung rac.
-
-2. **AI Customer Support Portal** (Mau tim `#7c3aed`)
-   - Mo ta: Intelligent ticket routing system with automated sentiment analysis and response triage.
-   - Tong so task: 4 task trai deu cac trang thai To Do, In Progress, Done.
-
-3. **DevOps CI/CD Automation Pipeline** (Mau xanh luc `#059669`)
-   - Mo ta: Infrastructure containerization, automated testing workflows, and Kubernetes deployment.
-   - Tong so task: 3 task voi han chot va muc uu tien khac nhau.
-
-4. **Mobile Banking Application V2** (Mau vang ho phach `#d97706`)
-   - Mo ta: Biometric authentication, real-time transaction tracking, and monthly expense analytics.
-   - Tong so task: 3 task voi han chot va muc uu tien khac nhau.
+*(Tại giao diện đăng nhập `LoginPage`, bạn chỉ cần bấm nút **Auto Fill** để tự động điền nhanh tài khoản này).*
 
 ---
 
-## 4. Danh sach Task mau trong Thung rac (De test chuc nang Trash 30 ngay)
+## 3. Danh sách 4 Dự án Mẫu được khởi tạo
 
-Seeder tu dong nap 2 cong viec da bi xoa (soft-deleted) vao muc Trash:
+1. **E-Commerce Microservices Platform** (Màu xanh dương `#2563eb`)
+   - Mô tả: Distributed shopping architecture with Express, MongoDB, and React client.
+   - Số lượng: 7 công việc đang hoạt động và 2 công việc mẫu trong Thùng rác.
+
+2. **AI Customer Support Portal** (Màu tím `#7c3aed`)
+   - Mô tả: Intelligent ticket routing system with automated sentiment analysis and response triage.
+   - Số lượng: 4 công việc trải đều các trạng thái To Do, In Progress, Done.
+
+3. **DevOps CI/CD Automation Pipeline** (Màu xanh lục `#059669`)
+   - Mô tả: Infrastructure containerization, automated testing workflows, and Kubernetes deployment.
+   - Số lượng: 3 công việc với mức độ ưu tiên và hạn chót khác nhau.
+
+4. **Mobile Banking Application V2** (Màu vàng hổ phách `#d97706`)
+   - Mô tả: Biometric authentication, real-time transaction tracking, and monthly expense analytics.
+   - Số lượng: 3 công việc với mức độ ưu tiên và hạn chót khác nhau.
+
+---
+
+## 4. Dữ liệu Thùng rác Mẫu (Để kiểm thử tính năng Trash 30 ngày)
+
+Script seeder tự động tạo sẵn 2 công việc ở trạng thái đã xóa mềm (`isDeleted: true`):
 
 1. **Legacy Session-Based Cookie Middleware**
-   - Du an goc: `E-Commerce Microservices Platform`
-   - Ngay xoa gia lap: Cach day 3 ngay (`deletedAt: now - 3 days`)
-   - Thoi gian luu tru con lai: **27 ngay**.
+   - Dự án gốc: `E-Commerce Microservices Platform`
+   - Thời gian xóa giả lập: Cách đây 3 ngày (`deletedAt: now - 3 days`)
+   - Số ngày lưu trữ còn lại: **27 ngày**.
 
 2. **Old XML Export Endpoint for Invoices**
-   - Du an goc: `E-Commerce Microservices Platform`
-   - Ngay xoa gia lap: Cach day 5 ngay (`deletedAt: now - 5 days`)
-   - Thoi gian luu tru con lai: **25 ngay**.
+   - Dự án gốc: `E-Commerce Microservices Platform`
+   - Thời gian xóa giả lập: Cách đây 5 ngày (`deletedAt: now - 5 days`)
+   - Số ngày lưu trữ còn lại: **25 ngày**.
 
-> Ban co the truy cap vao muc **Trash** tren thanh Menu de test ngay 2 tinh nang: **Restore** (Khoi phuc ve du an) va **Delete** (Xoa vinh vien).
+> Bạn có thể bấm vào mục **Trash** trên thanh điều hướng để kiểm thử ngay 2 chức năng: **Restore** (Khôi phục lại vào bảng dự án) và **Delete** (Xóa vĩnh viễn khỏi Database).

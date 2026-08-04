@@ -1,106 +1,106 @@
 # TaskFlow - MERN Stack Project & Task Management
 
-Du an web quan ly du an va cong viec ca nhan theo mo hinh Kanban (To Do / In Progress / Done) su dung MERN Stack (MongoDB, Express.js, React, Node.js). 
+Dự án web quản lý dự án và công việc cá nhân theo mô hình bảng Kanban (To Do / In Progress / Done) xây dựng trên nền tảng MERN Stack (MongoDB, Express.js, React 19, Node.js).
 
-Kien truc he thong tach biet ro rang giua Backend (`be`) va Frontend (`fe`), logic CRUD ro rang, de doc va de bao tri.
-
----
-
-## 1. Tinh nang chinh
-
-- Quan ly Du an (Project): Tao moi, chinh sua, doi mau nhan dien va xoa du an (ho tro cascade delete toan bo task con).
-- Bang Kanban truc quan: Ho tro keo tha cong viec (Native HTML5 Drag & Drop) giua 3 cot To Do, In Progress va Done.
-- Thung rac (Trash) luu tru 30 ngay: Keo tha cong viec ra ngoai pham vi 3 cot de chuyen vao thung rac khong can hop thoai xac nhan. Du lieu rac duoc luu toi da 30 ngay va tu dong xoa thong qua MongoDB TTL Index. Nguoi dung co the khoi phuc (Restore) hoac xoa vinh vien bat ky luc nao.
-- Sap xep rieng tung cot: Ho tro sap xep cong viec theo Thu tu tao, Do uu tien (Cao/Thap) va Han chot (Gan/Xa).
-- Tim kiem & Loc nhanh: Tim kiem cong viec theo tieu de hoac mo ta theo thoi gian thuc; loc theo muc do uu tien.
-- Cai dat nguoi dung: Doi mat khau, cap nhat ho ten/email va tuy chinh phong to/thu nho co chu giao dien (Scale 85% - 125%) luu tren localStorage.
-- Xac thuc & Bao mat: Dang ky, dang nhap bang JWT Bearer Token va ma hoa mat khau voi Bcrypt.
+Kiến trúc hệ thống tách biệt độc lập giữa Backend (`be`) và Frontend (`fe`), logic CRUD chuẩn chỉ, mã nguồn sạch sẽ, dễ đọc và dễ bảo trì.
 
 ---
 
-## 2. Cau truc thu muc
+## 1. Tính năng chính
+
+- Quản lý Dự án (Project): Tạo mới, chỉnh sửa, đổi màu nhận diện thương hiệu và xóa dự án (tự động cascade delete toàn bộ task con liên quan).
+- Bảng Kanban trực quan: Kéo thả công việc mượt mà (Native HTML5 Drag & Drop) giữa 3 cột trạng thái: To Do, In Progress và Done.
+- Thùng rác (Trash) lưu trữ 30 ngày: Kéo thả công việc ra ngoài phạm vi 3 cột để chuyển vào thùng rác không cần hộp thoại xác nhận phiền phức. Dữ liệu rác được lưu tối đa 30 ngày và tự động dọn dẹp thông qua MongoDB TTL Index. Người dùng có thể khôi phục (Restore) hoặc xóa vĩnh viễn (Delete Permanently) bất cứ lúc nào.
+- Sắp xếp độc lập từng cột: Hỗ trợ sắp xếp công việc theo Thứ tự tạo (Mới nhất / Cũ nhất), Độ ưu tiên (Cao đến Thấp / Thấp đến Cao) và Hạn chót (Gần nhất / Xa nhất).
+- Tìm kiếm & Lọc nhanh: Tìm kiếm công việc theo tiêu đề hoặc mô tả theo thời gian thực; lọc nhanh theo các mức độ ưu tiên (High, Medium, Low).
+- Cài đặt người dùng: Chỉnh sửa thông tin cá nhân (Họ tên, Email), đổi mật khẩu và tùy biến phóng to/thu nhỏ cỡ chữ giao diện (Scale 85% - 125%) lưu trữ bền vững trên `localStorage`.
+- Xác thực & Bảo mật: Đăng ký, đăng nhập an toàn bằng JWT Bearer Token và mã hóa mật khẩu với thư viện Bcrypt.
+
+---
+
+## 2. Cấu trúc thư mục dự án
 
 ```
 taskflow-mern/
-├── 000docs/                 # Tai lieu chi tiet ve Schema va Seed data
-│   ├── schema.md            # Mo ta cac collection va quan he database
-│   └── seed.md              # Huong dan va thong tin tai khoan test
+├── 000docs/                 # Tài liệu chi tiết về Schema và Seed data
+│   ├── schema.md            # Mô tả chi tiết các collection và quan hệ database
+│   └── seed.md              # Hướng dẫn và thông tin tài khoản demo
 ├── be/                      # Backend (Node.js + Express.js + MongoDB)
 │   ├── src/
-│   │   ├── config/          # Ket noi MongoDB (db.js)
-│   │   ├── controllers/     # Controller xu ly logic API (auth, project, task)
-│   │   ├── middlewares/     # Middleware bao mat JWT va bat loi tap trung
-│   │   ├── models/          # Mongoose schema (User, Project, Task)
-│   │   ├── routes/          # RESTful API routes
-│   │   └── utils/           # Helper JWT va file seedData.js
-│   ├── .env                 # Bien moi truong Backend
-│   ├── server.js            # Entrypoint Backend
-│   └── package.json
+│   │   ├── config/          # Cấu hình kết nối MongoDB (db.js)
+│   │   ├── controllers/     # Controller xử lý nghiệp vụ API (auth, project, task)
+│   │   ├── middlewares/     # Middleware xác thực JWT và xử lý lỗi tập trung
+│   │   ├── models/          # Mongoose Schema (User, Project, Task)
+│   │   ├── routes/          # Khai báo các RESTful API routes
+│   │   └── utils/           # Helper JWT và script khởi tạo dữ liệu (seedData.js)
+│   ├── .env                 # Biến môi trường Backend (PORT, MONGO_URI, JWT_SECRET)
+│   ├── server.js            # Điểm khởi chạy Backend server
+│   └── package.json         # Quản lý dependencies độc lập của Backend
 ├── fe/                      # Frontend (React 19 + Vite + Tailwind CSS)
 │   ├── src/
 │   │   ├── components/      # UI components (TaskCard, TaskModal, ProjectModal...)
-│   │   ├── context/         # AuthContext quan ly session dang nhap
+│   │   ├── context/         # AuthContext quản lý session đăng nhập toàn ứng dụng
 │   │   ├── pages/           # DashboardPage, ProjectDetailPage, TrashPage, LoginPage...
-│   │   ├── services/        # Axios API client
-│   │   ├── App.jsx          # Router & ProtectedRoute
-│   │   └── main.jsx         # Entrypoint React
-│   ├── vite.config.js       # Vite configuration
-│   └── package.json
-└── README.md
+│   │   ├── services/        # Axios API client tương tác với Backend
+│   │   ├── App.jsx          # Cấu hình Router và ProtectedRoute
+│   │   └── main.jsx         # Điểm khởi chạy React DOM
+│   ├── vite.config.js       # Cấu hình Vite và reverse proxy API
+│   └── package.json         # Quản lý dependencies độc lập của Frontend
+├── .gitignore               # Cấu hình bỏ qua file nhạy cảm và node_modules duy nhất
+└── README.md                # Tài liệu hướng dẫn sử dụng dự án
 ```
 
-Chi tiet them ve Database va Du lieu mau:
-- Xem tai lieu Schema tai: [000docs/schema.md](000docs/schema.md)
-- Xem thong tin du lieu mau tai: [000docs/seed.md](000docs/seed.md)
+Tài liệu chi tiết kỹ thuật:
+- Xem cấu trúc Database Schema tại: [000docs/schema.md](000docs/schema.md)
+- Xem thông tin dữ liệu mẫu và tài khoản test tại: [000docs/seed.md](000docs/seed.md)
 
 ---
 
-## 3. Huong dan cai dat va chay du an
+## 3. Hướng dẫn cài đặt và chạy dự án
 
-### Yeu cau moi truong
-- Node.js (phien ban 18 tro len)
-- MongoDB dang chay cuc bo tai `mongodb://127.0.0.1:27017` (hoac link ket noi MongoDB Atlas)
+### Yêu cầu môi trường
+- Đã cài đặt **Node.js** (phiên bản 18 trở lên).
+- Dịch vụ **MongoDB** đang chạy trên máy cục bộ tại `mongodb://127.0.0.1:27017` (hoặc cấu hình chuỗi kết nối MongoDB Atlas trong `be/.env`).
 
 ---
 
-### Buoc 1: Cai dat va chay Backend
+### Bước 1: Cài đặt và khởi chạy Backend
 
-Mo mot cua so terminal moi:
+Mở một cửa sổ terminal tại thư mục dự án:
 ```bash
 cd be
 npm install
 ```
 
-Khoi tao du lieu mau (Seeding):
+Khởi tạo dữ liệu mẫu (Seeding Database):
 ```bash
 npm run seed
 ```
-> Lenh tren se tao san tai khoan demo:
+> Lệnh trên sẽ kết nối MongoDB, tự động tạo cơ sở dữ liệu `taskflow_db`, tạo 3 collections (`users`, `projects`, `tasks`), thiết lập MongoDB TTL Index cho thùng rác 30 ngày và nạp sẵn tài khoản test cùng 4 dự án mẫu thực tế:
 > - Email: `nam.nguyen@ptit.edu.vn`
-> - Mat khau: `password123`
-> Va tu dong tao 4 du an mau kem cac cong viec thuc te.
+> - Mật khẩu: `password123`
 
-Khoi chay Backend server:
+Khởi chạy máy chủ Backend:
 ```bash
 npm run dev
 ```
-Backend se lang nghe tai: `http://localhost:5001`
+Backend API sẽ hoạt động tại: `http://localhost:5001`
 
 ---
 
-### Buoc 2: Cai dat va chay Frontend
+### Bước 2: Cài đặt và khởi chạy Frontend
 
-Mo mot cua so terminal khac:
+Mở một cửa sổ terminal riêng biệt thứ hai:
 ```bash
 cd fe
 npm install
 npm run dev
 ```
-Frontend se chay tai: `http://localhost:5173`
+Frontend Web sẽ hoạt động tại: `http://localhost:5173`
 
 ---
 
-### Buoc 3: Trai nghiem ung dung
-1. Mo trinh duyet truy cap: `http://localhost:5173`
-2. Bam nut **Auto Fill** tai trang dang nhap (hoac nhap `nam.nguyen@ptit.edu.vn` / `password123`) va bam **Sign In**.
-3. Trai nghiem keo tha cac the cong viec giua cac cot hoac keo ra ngoai 3 cot de chuyen vao **Trash**.
+### Bước 3: Trải nghiệm ứng dụng
+1. Mở trình duyệt truy cập: `http://localhost:5173`
+2. Bấm nút **Auto Fill** tại trang Đăng nhập (hoặc nhập `nam.nguyen@ptit.edu.vn` / `password123`) và bấm **Sign In**.
+3. Trải nghiệm tính năng kéo thả công việc giữa 3 cột hoặc kéo thả ra ngoài 3 cột để chuyển vào mục **Trash**.
