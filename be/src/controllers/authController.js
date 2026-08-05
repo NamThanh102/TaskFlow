@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
 
 // Helper function to generate JWT
 const generateToken = (userId) => {
@@ -10,7 +10,7 @@ const generateToken = (userId) => {
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
-const register = async (req, res, next) => {
+export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
@@ -50,7 +50,7 @@ const register = async (req, res, next) => {
 
 // @desc    User Login
 // @route   POST /api/auth/login
-const login = async (req, res, next) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -97,7 +97,7 @@ const login = async (req, res, next) => {
 
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
-const getMe = async (req, res, next) => {
+export const getMe = async (req, res, next) => {
   try {
     res.status(200).json({
       success: true,
@@ -110,7 +110,7 @@ const getMe = async (req, res, next) => {
 
 // @desc    Update user profile (Name, Email)
 // @route   PUT /api/auth/profile
-const updateProfile = async (req, res, next) => {
+export const updateProfile = async (req, res, next) => {
   try {
     const { name, email } = req.body;
 
@@ -161,7 +161,7 @@ const updateProfile = async (req, res, next) => {
 
 // @desc    Change password
 // @route   PUT /api/auth/change-password
-const changePassword = async (req, res, next) => {
+export const changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -205,12 +205,4 @@ const changePassword = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-module.exports = {
-  register,
-  login,
-  getMe,
-  updateProfile,
-  changePassword,
 };

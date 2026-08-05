@@ -1,5 +1,5 @@
-const express = require('express');
-const {
+import express from 'express';
+import {
   createTask,
   getTasksByProject,
   updateTask,
@@ -9,8 +9,8 @@ const {
   restoreTask,
   deleteTaskPermanently,
   emptyTrash,
-} = require('../controllers/taskController');
-const { protect } = require('../middlewares/authMiddleware');
+} from '../controllers/taskController.js';
+import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -32,4 +32,4 @@ router.route('/:id')
   .put(updateTask)
   .delete(deleteTask);
 
-module.exports = router;
+export default router;

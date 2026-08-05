@@ -3,18 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { projectService } from '../services/projectService';
 import { taskService } from '../services/taskService';
 import Navbar from '../components/common/Navbar';
-import TaskCard from '../components/TaskCard';
 import TaskModal from '../components/TaskModal';
-import {
-  ArrowLeft,
-  Plus,
-  Search,
-  Filter,
-  Trash2,
-  ArrowUpDown,
-  Loader2,
-  Info,
-} from 'lucide-react';
+import KanbanHeader from '../components/kanban/KanbanHeader';
+import KanbanColumn from '../components/kanban/KanbanColumn';
+import { Trash2, Loader2, Info } from 'lucide-react';
 
 const priorityScore = { high: 3, medium: 2, low: 1 };
 
@@ -232,97 +224,18 @@ const ProjectDetailPage = () => {
     >
       <Navbar />
 
-      {/* Project Subheader */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
-          {/* Top navigation row */}
-          <div className="flex items-center justify-between mb-3">
-            <Link
-              to="/"
-              className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-slate-900 transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Projects</span>
-            </Link>
-
-            <div className="flex items-center space-x-2">
-              <Link
-                to="/trash"
-                className="inline-flex items-center space-x-1 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                title="View deleted tasks"
-              >
-                <Trash2 className="w-3.5 h-3.5 text-slate-500" />
-                <span>Trash</span>
-              </Link>
-
-              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Active Project
-              </span>
-            </div>
-          </div>
-
-          {/* Project Details row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center space-x-2.5">
-                <span
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: project.color || '#4f46e5' }}
-                />
-                <h1 className="text-lg font-bold text-slate-900">{project.name}</h1>
-              </div>
-              {project.description && (
-                <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                  {project.description}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Filters & Action Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-100">
-            {/* Search & Priority Filter */}
-            <div className="flex items-center space-x-2 flex-1 max-w-md">
-              <div className="relative flex-1">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search tasks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-slate-400 transition-colors"
-                />
-              </div>
-
-              <div className="flex items-center space-x-1 border border-slate-200 rounded-lg px-2 py-1 bg-slate-50">
-                <Filter className="w-3 h-3 text-slate-400" />
-                <select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="bg-transparent text-xs text-slate-600 focus:outline-none cursor-pointer border-none"
-                >
-                  <option value="all">All Priorities</option>
-                  <option value="high">High Priority</option>
-                  <option value="medium">Medium Priority</option>
-                  <option value="low">Low Priority</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Add Task Button */}
-            <button
-              onClick={() => {
-                setEditingTask(null);
-                setIsTaskModalOpen(true);
-              }}
-              className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Task</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Project Subheader & Action Bar */}
+      <KanbanHeader
+        project={project}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        priorityFilter={priorityFilter}
+        setPriorityFilter={setPriorityFilter}
+        onAddTask={() => {
+          setEditingTask(null);
+          setIsTaskModalOpen(true);
+        }}
+      />
 
       {/* Dragging hint & Toast notification */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full pt-4">
@@ -351,209 +264,65 @@ const ProjectDetailPage = () => {
       {/* Main Kanban Board (3 Columns) */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-2">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-          {/* Column 1: TO DO */}
-          <div
-            onDragOver={(e) => handleDragOverColumn(e, 'todo')}
-            onDragLeave={(e) => handleDragLeaveColumn(e, 'todo')}
-            onDrop={(e) => handleDropOnColumn(e, 'todo')}
-            className={`rounded-xl p-3.5 border transition-all min-h-[360px] flex flex-col ${
-              dragOverColumn === 'todo'
-                ? 'bg-slate-200/90 border-slate-400 ring-2 ring-slate-300'
-                : 'bg-slate-100/80 border-slate-200'
-            }`}
-          >
-            {/* Column Header with individual Sort */}
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/80">
-              <div className="flex items-center space-x-2">
-                <h3 className="text-xs font-semibold text-slate-800 tracking-wide uppercase">
-                  To Do
-                </h3>
-                <span className="text-[11px] font-semibold px-2 py-0.2 rounded bg-white text-slate-600 border border-slate-200">
-                  {todoTasks.length}
-                </span>
-              </div>
+          <KanbanColumn
+            status="todo"
+            title="To Do"
+            tasks={todoTasks}
+            sortValue={columnSorts.todo}
+            onSortChange={(val) => setColumnSorts({ ...columnSorts, todo: val })}
+            onDragOver={handleDragOverColumn}
+            onDragLeave={handleDragLeaveColumn}
+            onDrop={handleDropOnColumn}
+            isDragOver={dragOverColumn === 'todo'}
+            draggingTaskId={draggingTaskId}
+            onEditTask={(task) => {
+              setEditingTask(task);
+              setIsTaskModalOpen(true);
+            }}
+            onDragStartTask={(id) => setDraggingTaskId(id)}
+            onDragEndTask={() => setDraggingTaskId(null)}
+            emptyMessage="No tasks in To Do"
+          />
 
-              {/* Individual Sort Select */}
-              <div className="flex items-center space-x-1 text-slate-500">
-                <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                <select
-                  value={columnSorts.todo}
-                  onChange={(e) =>
-                    setColumnSorts({ ...columnSorts, todo: e.target.value })
-                  }
-                  className="text-[11px] bg-transparent text-slate-600 focus:outline-none cursor-pointer border-none py-0.5"
-                  title="Sort To Do tasks"
-                >
-                  <option value="default">Default order</option>
-                  <option value="priority_desc">Priority: High to Low</option>
-                  <option value="priority_asc">Priority: Low to High</option>
-                  <option value="due_asc">Due Date: Earliest</option>
-                  <option value="due_desc">Due Date: Latest</option>
-                  <option value="created_desc">Created: Newest</option>
-                  <option value="created_asc">Created: Oldest</option>
-                </select>
-              </div>
-            </div>
+          <KanbanColumn
+            status="in_progress"
+            title="In Progress"
+            tasks={inProgressTasks}
+            sortValue={columnSorts.in_progress}
+            onSortChange={(val) => setColumnSorts({ ...columnSorts, in_progress: val })}
+            onDragOver={handleDragOverColumn}
+            onDragLeave={handleDragLeaveColumn}
+            onDrop={handleDropOnColumn}
+            isDragOver={dragOverColumn === 'in_progress'}
+            draggingTaskId={draggingTaskId}
+            onEditTask={(task) => {
+              setEditingTask(task);
+              setIsTaskModalOpen(true);
+            }}
+            onDragStartTask={(id) => setDraggingTaskId(id)}
+            onDragEndTask={() => setDraggingTaskId(null)}
+            emptyMessage="No tasks in Progress"
+          />
 
-            {/* Tasks Container */}
-            <div className="space-y-2.5 flex-1">
-              {todoTasks.map((task) => (
-                <TaskCard
-                  key={task._id}
-                  task={task}
-                  onEdit={() => {
-                    setEditingTask(task);
-                    setIsTaskModalOpen(true);
-                  }}
-                  onDragStart={(id) => setDraggingTaskId(id)}
-                  onDragEnd={() => setDraggingTaskId(null)}
-                  isDragging={draggingTaskId === task._id}
-                />
-              ))}
-
-              {todoTasks.length === 0 && (
-                <div className="h-28 flex items-center justify-center border border-dashed border-slate-200 rounded-lg text-xs text-slate-400">
-                  No tasks in To Do
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Column 2: IN PROGRESS */}
-          <div
-            onDragOver={(e) => handleDragOverColumn(e, 'in_progress')}
-            onDragLeave={(e) => handleDragLeaveColumn(e, 'in_progress')}
-            onDrop={(e) => handleDropOnColumn(e, 'in_progress')}
-            className={`rounded-xl p-3.5 border transition-all min-h-[360px] flex flex-col ${
-              dragOverColumn === 'in_progress'
-                ? 'bg-slate-200/90 border-slate-400 ring-2 ring-slate-300'
-                : 'bg-slate-100/80 border-slate-200'
-            }`}
-          >
-            {/* Column Header with individual Sort */}
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/80">
-              <div className="flex items-center space-x-2">
-                <h3 className="text-xs font-semibold text-slate-800 tracking-wide uppercase">
-                  In Progress
-                </h3>
-                <span className="text-[11px] font-semibold px-2 py-0.2 rounded bg-white text-slate-600 border border-slate-200">
-                  {inProgressTasks.length}
-                </span>
-              </div>
-
-              {/* Individual Sort Select */}
-              <div className="flex items-center space-x-1 text-slate-500">
-                <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                <select
-                  value={columnSorts.in_progress}
-                  onChange={(e) =>
-                    setColumnSorts({ ...columnSorts, in_progress: e.target.value })
-                  }
-                  className="text-[11px] bg-transparent text-slate-600 focus:outline-none cursor-pointer border-none py-0.5"
-                  title="Sort In Progress tasks"
-                >
-                  <option value="default">Default order</option>
-                  <option value="priority_desc">Priority: High to Low</option>
-                  <option value="priority_asc">Priority: Low to High</option>
-                  <option value="due_asc">Due Date: Earliest</option>
-                  <option value="due_desc">Due Date: Latest</option>
-                  <option value="created_desc">Created: Newest</option>
-                  <option value="created_asc">Created: Oldest</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Tasks Container */}
-            <div className="space-y-2.5 flex-1">
-              {inProgressTasks.map((task) => (
-                <TaskCard
-                  key={task._id}
-                  task={task}
-                  onEdit={() => {
-                    setEditingTask(task);
-                    setIsTaskModalOpen(true);
-                  }}
-                  onDragStart={(id) => setDraggingTaskId(id)}
-                  onDragEnd={() => setDraggingTaskId(null)}
-                  isDragging={draggingTaskId === task._id}
-                />
-              ))}
-
-              {inProgressTasks.length === 0 && (
-                <div className="h-28 flex items-center justify-center border border-dashed border-slate-200 rounded-lg text-xs text-slate-400">
-                  No tasks in Progress
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Column 3: DONE */}
-          <div
-            onDragOver={(e) => handleDragOverColumn(e, 'done')}
-            onDragLeave={(e) => handleDragLeaveColumn(e, 'done')}
-            onDrop={(e) => handleDropOnColumn(e, 'done')}
-            className={`rounded-xl p-3.5 border transition-all min-h-[360px] flex flex-col ${
-              dragOverColumn === 'done'
-                ? 'bg-slate-200/90 border-slate-400 ring-2 ring-slate-300'
-                : 'bg-slate-100/80 border-slate-200'
-            }`}
-          >
-            {/* Column Header with individual Sort */}
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/80">
-              <div className="flex items-center space-x-2">
-                <h3 className="text-xs font-semibold text-slate-800 tracking-wide uppercase">
-                  Done
-                </h3>
-                <span className="text-[11px] font-semibold px-2 py-0.2 rounded bg-white text-slate-600 border border-slate-200">
-                  {doneTasks.length}
-                </span>
-              </div>
-
-              {/* Individual Sort Select */}
-              <div className="flex items-center space-x-1 text-slate-500">
-                <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                <select
-                  value={columnSorts.done}
-                  onChange={(e) =>
-                    setColumnSorts({ ...columnSorts, done: e.target.value })
-                  }
-                  className="text-[11px] bg-transparent text-slate-600 focus:outline-none cursor-pointer border-none py-0.5"
-                  title="Sort Done tasks"
-                >
-                  <option value="default">Default order</option>
-                  <option value="priority_desc">Priority: High to Low</option>
-                  <option value="priority_asc">Priority: Low to High</option>
-                  <option value="due_asc">Due Date: Earliest</option>
-                  <option value="due_desc">Due Date: Latest</option>
-                  <option value="created_desc">Created: Newest</option>
-                  <option value="created_asc">Created: Oldest</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Tasks Container */}
-            <div className="space-y-2.5 flex-1">
-              {doneTasks.map((task) => (
-                <TaskCard
-                  key={task._id}
-                  task={task}
-                  onEdit={() => {
-                    setEditingTask(task);
-                    setIsTaskModalOpen(true);
-                  }}
-                  onDragStart={(id) => setDraggingTaskId(id)}
-                  onDragEnd={() => setDraggingTaskId(null)}
-                  isDragging={draggingTaskId === task._id}
-                />
-              ))}
-
-              {doneTasks.length === 0 && (
-                <div className="h-28 flex items-center justify-center border border-dashed border-slate-200 rounded-lg text-xs text-slate-400">
-                  No completed tasks yet
-                </div>
-              )}
-            </div>
-          </div>
+          <KanbanColumn
+            status="done"
+            title="Done"
+            tasks={doneTasks}
+            sortValue={columnSorts.done}
+            onSortChange={(val) => setColumnSorts({ ...columnSorts, done: val })}
+            onDragOver={handleDragOverColumn}
+            onDragLeave={handleDragLeaveColumn}
+            onDrop={handleDropOnColumn}
+            isDragOver={dragOverColumn === 'done'}
+            draggingTaskId={draggingTaskId}
+            onEditTask={(task) => {
+              setEditingTask(task);
+              setIsTaskModalOpen(true);
+            }}
+            onDragStartTask={(id) => setDraggingTaskId(id)}
+            onDragEndTask={() => setDraggingTaskId(null)}
+            emptyMessage="No completed tasks yet"
+          />
         </div>
       </main>
 

@@ -1,9 +1,9 @@
-const Task = require('../models/Task');
-const Project = require('../models/Project');
+import Task from '../models/Task.js';
+import Project from '../models/Project.js';
 
 // @desc    Create a new task
 // @route   POST /api/tasks
-const createTask = async (req, res, next) => {
+export const createTask = async (req, res, next) => {
   try {
     const { title, description, status, priority, dueDate, dueTime, projectId } = req.body;
 
@@ -52,7 +52,7 @@ const createTask = async (req, res, next) => {
 
 // @desc    Get tasks of a project (excluding trash)
 // @route   GET /api/tasks/project/:projectId
-const getTasksByProject = async (req, res, next) => {
+export const getTasksByProject = async (req, res, next) => {
   try {
     const { projectId } = req.params;
     const { status, priority, search } = req.query;
@@ -86,7 +86,7 @@ const getTasksByProject = async (req, res, next) => {
 
 // @desc    Update task details
 // @route   PUT /api/tasks/:id
-const updateTask = async (req, res, next) => {
+export const updateTask = async (req, res, next) => {
   try {
     const { title, description, status, priority, dueDate, dueTime } = req.body;
 
@@ -124,7 +124,7 @@ const updateTask = async (req, res, next) => {
 
 // @desc    Update task status (drag-and-drop between columns)
 // @route   PATCH /api/tasks/:id/status
-const updateTaskStatus = async (req, res, next) => {
+export const updateTaskStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
 
@@ -163,7 +163,7 @@ const updateTaskStatus = async (req, res, next) => {
 
 // @desc    Soft delete task (move to trash, retained for 30 days)
 // @route   DELETE /api/tasks/:id
-const deleteTask = async (req, res, next) => {
+export const deleteTask = async (req, res, next) => {
   try {
     const task = await Task.findOne({
       _id: req.params.id,
@@ -193,7 +193,7 @@ const deleteTask = async (req, res, next) => {
 
 // @desc    Get all trashed tasks (retained for up to 30 days)
 // @route   GET /api/tasks/trash
-const getTrashTasks = async (req, res, next) => {
+export const getTrashTasks = async (req, res, next) => {
   try {
     const tasks = await Task.find({
       user: req.user._id,
@@ -214,7 +214,7 @@ const getTrashTasks = async (req, res, next) => {
 
 // @desc    Restore task from trash
 // @route   PATCH /api/tasks/:id/restore
-const restoreTask = async (req, res, next) => {
+export const restoreTask = async (req, res, next) => {
   try {
     const task = await Task.findOne({
       _id: req.params.id,
@@ -245,7 +245,7 @@ const restoreTask = async (req, res, next) => {
 
 // @desc    Permanently delete a task from trash
 // @route   DELETE /api/tasks/:id/permanent
-const deleteTaskPermanently = async (req, res, next) => {
+export const deleteTaskPermanently = async (req, res, next) => {
   try {
     const task = await Task.findOne({
       _id: req.params.id,
@@ -274,7 +274,7 @@ const deleteTaskPermanently = async (req, res, next) => {
 
 // @desc    Empty trash (permanently remove all trashed tasks)
 // @route   DELETE /api/tasks/trash/empty
-const emptyTrash = async (req, res, next) => {
+export const emptyTrash = async (req, res, next) => {
   try {
     const result = await Task.deleteMany({
       user: req.user._id,
@@ -289,16 +289,4 @@ const emptyTrash = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-module.exports = {
-  createTask,
-  getTasksByProject,
-  updateTask,
-  updateTaskStatus,
-  deleteTask,
-  getTrashTasks,
-  restoreTask,
-  deleteTaskPermanently,
-  emptyTrash,
 };

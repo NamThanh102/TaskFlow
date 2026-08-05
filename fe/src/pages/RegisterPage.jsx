@@ -29,7 +29,11 @@ const RegisterPage = () => {
       await register(name, email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      if (!err.response) {
+        setError('Cannot connect to backend server (Port 5001). Please check if backend is running.');
+      } else {
+        setError(err.response?.data?.message || 'Registration failed');
+      }
     } finally {
       setLoading(false);
     }

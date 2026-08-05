@@ -10,7 +10,6 @@ import TrashPage from './pages/TrashPage';
 // Component kiểm tra trạng thái đăng nhập
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -29,17 +28,13 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/"
-            element={
+          <Route path="/" element={
               <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/project/:id"
-            element={
+          <Route path="/project/:id" element={
               <ProtectedRoute>
                 <ProjectDetailPage />
               </ProtectedRoute>

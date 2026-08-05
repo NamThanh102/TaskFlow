@@ -2,8 +2,6 @@
 
 Dự án web quản lý dự án và công việc cá nhân theo mô hình bảng Kanban (To Do / In Progress / Done) xây dựng trên nền tảng MERN Stack (MongoDB, Express.js, React 19, Node.js).
 
-Kiến trúc hệ thống tách biệt độc lập giữa Backend (`be`) và Frontend (`fe`), logic CRUD chuẩn chỉ, mã nguồn sạch sẽ, dễ đọc và dễ bảo trì.
-
 ---
 
 ## 1. Tính năng chính

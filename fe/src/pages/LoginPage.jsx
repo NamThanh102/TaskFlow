@@ -19,7 +19,11 @@ const LoginPage = () => {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      if (!err.response) {
+        setError('Cannot connect to backend server (Port 5001). Please check if backend is running.');
+      } else {
+        setError(err.response?.data?.message || 'Invalid email or password');
+      }
     } finally {
       setLoading(false);
     }

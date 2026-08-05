@@ -1,13 +1,13 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
 
-const connectDB = require('./src/config/db');
-const authRoutes = require('./src/routes/authRoutes');
-const projectRoutes = require('./src/routes/projectRoutes');
-const taskRoutes = require('./src/routes/taskRoutes');
-const { notFound, errorHandler } = require('./src/middlewares/errorMiddleware');
+import connectDB from './src/config/db.js';
+import authRoutes from './src/routes/authRoutes.js';
+import projectRoutes from './src/routes/projectRoutes.js';
+import taskRoutes from './src/routes/taskRoutes.js';
+import { notFound, errorHandler } from './src/middlewares/errorMiddleware.js';
 
 // Kết nối cơ sở dữ liệu MongoDB
 connectDB();

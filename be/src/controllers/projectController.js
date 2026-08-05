@@ -1,9 +1,9 @@
-const Project = require('../models/Project');
-const Task = require('../models/Task');
+import Project from '../models/Project.js';
+import Task from '../models/Task.js';
 
 // @desc    Create a new project
 // @route   POST /api/projects
-const createProject = async (req, res, next) => {
+export const createProject = async (req, res, next) => {
   try {
     const { name, description, color } = req.body;
 
@@ -33,7 +33,7 @@ const createProject = async (req, res, next) => {
 
 // @desc    Get all projects for the current user
 // @route   GET /api/projects
-const getProjects = async (req, res, next) => {
+export const getProjects = async (req, res, next) => {
   try {
     const projects = await Project.find({ user: req.user._id }).sort({ createdAt: -1 });
 
@@ -68,7 +68,7 @@ const getProjects = async (req, res, next) => {
 
 // @desc    Get single project details and non-deleted tasks
 // @route   GET /api/projects/:id
-const getProjectById = async (req, res, next) => {
+export const getProjectById = async (req, res, next) => {
   try {
     const project = await Project.findOne({
       _id: req.params.id,
@@ -101,7 +101,7 @@ const getProjectById = async (req, res, next) => {
 
 // @desc    Update project
 // @route   PUT /api/projects/:id
-const updateProject = async (req, res, next) => {
+export const updateProject = async (req, res, next) => {
   try {
     const { name, description, color } = req.body;
 
@@ -135,7 +135,7 @@ const updateProject = async (req, res, next) => {
 
 // @desc    Delete project (cascades delete on tasks)
 // @route   DELETE /api/projects/:id
-const deleteProject = async (req, res, next) => {
+export const deleteProject = async (req, res, next) => {
   try {
     const project = await Project.findOne({
       _id: req.params.id,
@@ -159,12 +159,4 @@ const deleteProject = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-module.exports = {
-  createProject,
-  getProjects,
-  getProjectById,
-  updateProject,
-  deleteProject,
 };
