@@ -1,0 +1,57 @@
+services:
+
+  
+
+  # 1. Dịch vụ Database (MongoDB)
+  mongo:
+    image: mongo:7.0
+    container_name: taskflow-mongo
+    restart: always
+    # ports:  (cũng nên ẩn như backend, cần xem qua mongodbcompass thì mở ra để compass call cũng được)
+    #   - "27018:27017"
+    volumes:
+      - mongo_data:/data/db # tạo volume để lưu, khi tắt/xóa container không bị mất dữ liệu
+
+  # 2. Dịch vụ Backend (Node.js)
+  backend:
+    build: ./be
+    container_name: taskflow-backend
+    volumes:
+      - ./be:/app               # 1. BIND MOUNT: Thư mục be ở ngoài máy thật soi thẳng vào /app
+      - /app/node_modules        # 2.  Giữ lại node_modules của Linux, không để node_modules của Windows đè lên gây lỗi
+    command: npm run dev        # 3. Dùng nodemon để tự restart server mỗi khi bạn bấm Ctrl + S lưu file
+
+    restart: always
+    # ports: (nên ẩn tránh lộ port be mà cần vẫn call tới đc thông quan nginx)
+    #   - "5002:5001" 
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongo:27017/taskflow # Dùng tên service 'mongo' thay cho localhost
+      - REDIS_URL=redis://redis:6379   # <-- Kết nối tới container redis qua cổng 6379
+      - JWT_SECRET=taskflow_jwt_secret_key_super_secure_2026
+      - CLIENT_URL=http://localhost
+    depends_on:
+      - mongo 
+      - redis
+
+  # 3. Dịch vụ Frontend (React + Nginx)
+  frontend:
+    build: ./fe
+    container_name: taskflow-frontend
+    restart: always
+    ports:
+      - "81:80" 
+    depends_on:
+      - backend
+      
+  
+  # Thêm dịch vụ Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: taskflow-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo_data:

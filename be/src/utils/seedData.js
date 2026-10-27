@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Project from '../models/Project.js';
 import Task from '../models/Task.js';
+import redis from '../config/redis.js';
 
 const seedData = async () => {
   try {
@@ -14,6 +15,16 @@ const seedData = async () => {
     await Project.deleteMany();
     await Task.deleteMany();
     console.log('[Seed] Cleared existing collections...');
+
+    // Clear Redis cache if available
+    try {
+      if (redis.status === 'ready') {
+        await redis.flushdb();
+        console.log('[Seed] Cleared Redis cache...');
+      }
+    } catch (redisErr) {
+      console.warn('[Seed] Skipped Redis flush:', redisErr.message);
+    }
 
     // 1. Create Default Demo User
     const user = await User.create({

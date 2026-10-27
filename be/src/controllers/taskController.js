@@ -1,8 +1,8 @@
 import Task from '../models/Task.js';
 import Project from '../models/Project.js';
+import { delCache } from '../config/redis.js';
 
-// @desc    Create a new task
-// @route   POST /api/tasks
+// Create a new task
 export const createTask = async (req, res, next) => {
   try {
     const { title, description, status, priority, dueDate, dueTime, projectId } = req.body;
@@ -40,6 +40,9 @@ export const createTask = async (req, res, next) => {
       deletedAt: null,
     });
 
+    // Xóa cache danh sách dự án (để cập nhật count) và chi tiết Kanban board của dự án
+    await delCache(`projects:user:${req.user._id}`, `project:detail:${projectId}`);
+
     res.status(201).json({
       success: true,
       message: 'Task created successfully',
@@ -50,8 +53,7 @@ export const createTask = async (req, res, next) => {
   }
 };
 
-// @desc    Get tasks of a project (excluding trash)
-// @route   GET /api/tasks/project/:projectId
+// Get tasks of a project (excluding trash)
 export const getTasksByProject = async (req, res, next) => {
   try {
     const { projectId } = req.params;
@@ -84,8 +86,7 @@ export const getTasksByProject = async (req, res, next) => {
   }
 };
 
-// @desc    Update task details
-// @route   PUT /api/tasks/:id
+// Update task details
 export const updateTask = async (req, res, next) => {
   try {
     const { title, description, status, priority, dueDate, dueTime } = req.body;
@@ -112,6 +113,9 @@ export const updateTask = async (req, res, next) => {
 
     await task.save();
 
+    // Xóa cache danh sách dự án và chi tiết Kanban
+    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+
     res.status(200).json({
       success: true,
       message: 'Task updated successfully',
@@ -122,8 +126,7 @@ export const updateTask = async (req, res, next) => {
   }
 };
 
-// @desc    Update task status (drag-and-drop between columns)
-// @route   PATCH /api/tasks/:id/status
+// Update task status (drag-and-drop between columns)
 export const updateTaskStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
@@ -151,6 +154,9 @@ export const updateTaskStatus = async (req, res, next) => {
     task.status = status;
     await task.save();
 
+    // Invalidate caches (completedTasks count changed & board changed)
+    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+
     res.status(200).json({
       success: true,
       message: 'Status updated successfully',
@@ -161,8 +167,7 @@ export const updateTaskStatus = async (req, res, next) => {
   }
 };
 
-// @desc    Soft delete task (move to trash, retained for 30 days)
-// @route   DELETE /api/tasks/:id
+// Soft delete task (move to trash, retained for 30 days)
 export const deleteTask = async (req, res, next) => {
   try {
     const task = await Task.findOne({
@@ -181,6 +186,9 @@ export const deleteTask = async (req, res, next) => {
     task.deletedAt = new Date();
     await task.save();
 
+    // Xóa cache do task count và danh sách task trên board thay đổi
+    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+
     res.status(200).json({
       success: true,
       message: 'Task moved to trash',
@@ -191,8 +199,7 @@ export const deleteTask = async (req, res, next) => {
   }
 };
 
-// @desc    Get all trashed tasks (retained for up to 30 days)
-// @route   GET /api/tasks/trash
+// Get all trashed tasks (retained for up to 30 days)
 export const getTrashTasks = async (req, res, next) => {
   try {
     const tasks = await Task.find({
@@ -212,8 +219,7 @@ export const getTrashTasks = async (req, res, next) => {
   }
 };
 
-// @desc    Restore task from trash
-// @route   PATCH /api/tasks/:id/restore
+// Restore task from trash
 export const restoreTask = async (req, res, next) => {
   try {
     const task = await Task.findOne({
@@ -233,6 +239,9 @@ export const restoreTask = async (req, res, next) => {
     task.deletedAt = null;
     await task.save();
 
+    // Xóa cache để khôi phục count và task trên board
+    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+
     res.status(200).json({
       success: true,
       message: 'Task restored successfully',
@@ -243,8 +252,7 @@ export const restoreTask = async (req, res, next) => {
   }
 };
 
-// @desc    Permanently delete a task from trash
-// @route   DELETE /api/tasks/:id/permanent
+// Permanently delete a task from trash
 export const deleteTaskPermanently = async (req, res, next) => {
   try {
     const task = await Task.findOne({
@@ -262,6 +270,9 @@ export const deleteTaskPermanently = async (req, res, next) => {
 
     await task.deleteOne();
 
+    // Xóa cache dự phòng
+    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+
     res.status(200).json({
       success: true,
       message: 'Task permanently deleted',
@@ -272,14 +283,16 @@ export const deleteTaskPermanently = async (req, res, next) => {
   }
 };
 
-// @desc    Empty trash (permanently remove all trashed tasks)
-// @route   DELETE /api/tasks/trash/empty
+// Empty trash (permanently remove all trashed tasks)
 export const emptyTrash = async (req, res, next) => {
   try {
     const result = await Task.deleteMany({
       user: req.user._id,
       isDeleted: true,
     });
+
+    // Invalidate user projects cache
+    await delCache(`projects:user:${req.user._id}`);
 
     res.status(200).json({
       success: true,

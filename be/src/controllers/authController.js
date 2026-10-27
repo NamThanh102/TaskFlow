@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { delCache } from '../config/redis.js';
 
 // Helper function to generate JWT
 const generateToken = (userId) => {
@@ -8,8 +9,7 @@ const generateToken = (userId) => {
   });
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
+// Register a new user
 export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -48,8 +48,7 @@ export const register = async (req, res, next) => {
   }
 };
 
-// @desc    User Login
-// @route   POST /api/auth/login
+// User Login
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -95,8 +94,7 @@ export const login = async (req, res, next) => {
   }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
+// Get current logged in user
 export const getMe = async (req, res, next) => {
   try {
     res.status(200).json({
@@ -108,8 +106,7 @@ export const getMe = async (req, res, next) => {
   }
 };
 
-// @desc    Update user profile (Name, Email)
-// @route   PUT /api/auth/profile
+// Update user profile (Name, Email)
 export const updateProfile = async (req, res, next) => {
   try {
     const { name, email } = req.body;
@@ -143,6 +140,9 @@ export const updateProfile = async (req, res, next) => {
     user.email = email;
     await user.save();
 
+    // Xóa cache thông tin user trong Redis
+    await delCache(`user:${user._id}`);
+
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
@@ -159,8 +159,7 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
-// @desc    Change password
-// @route   PUT /api/auth/change-password
+// Change password
 export const changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -197,6 +196,9 @@ export const changePassword = async (req, res, next) => {
 
     user.password = newPassword;
     await user.save();
+
+    // Xóa cache thông tin user trong Redis
+    await delCache(`user:${user._id}`);
 
     res.status(200).json({
       success: true,
