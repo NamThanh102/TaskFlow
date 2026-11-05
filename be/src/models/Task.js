@@ -65,5 +65,9 @@ taskSchema.index(
   }
 );
 
+// Compound indexes for fast Kanban retrieval and user filtering
+taskSchema.index({ project: 1, isDeleted: 1, status: 1 });
+taskSchema.index({ user: 1, isDeleted: 1 });
+
 const Task = mongoose.model('Task', taskSchema);
 export default Task;

@@ -34,7 +34,7 @@ export const createProject = async (req, res, next) => {
   }
 };
 
-// Get all projects for current user (with cached aggregation)
+// Get all projects for current user (Optimized aggregation: eliminates N+1 query problem)
 export const getProjects = async (req, res, next) => {
   try {
     const cacheKey = `projects:user:${req.user._id}`;
@@ -45,26 +45,45 @@ export const getProjects = async (req, res, next) => {
       return res.status(200).json(cachedData);
     }
 
-    // 2. Cache miss -> Quét MongoDB và đếm số tasks
-    const projects = await Project.find({ user: req.user._id }).sort({ createdAt: -1 });
-    const projectsWithTaskCounts = await Promise.all(
-      projects.map(async (project) => {
-        const totalTasks = await Task.countDocuments({
-          project: project._id,
-          isDeleted: { $ne: true },
-        });
-        const completedTasks = await Task.countDocuments({
-          project: project._id,
-          status: 'done',
-          isDeleted: { $ne: true },
-        });
-        return {
-          ...project.toObject(),
-          totalTasks,
-          completedTasks,
-        };
-      })
-    );
+    // 2. Cache miss -> Thực thi song song 2 queries tối ưu (thay vì 1 + 2N queries)
+    const [projects, taskStats] = await Promise.all([
+      Project.find({ user: req.user._id }).sort({ createdAt: -1 }).lean(),
+      Task.aggregate([
+        {
+          $match: {
+            user: req.user._id,
+            isDeleted: { $ne: true },
+          },
+        },
+        {
+          $group: {
+            _id: '$project',
+            totalTasks: { $sum: 1 },
+            completedTasks: {
+              $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] },
+            },
+          },
+        },
+      ]),
+    ]);
+
+    // Gom số liệu đếm bằng Map để map với độ phức tạp O(1)
+    const statsMap = new Map();
+    taskStats.forEach((stat) => {
+      statsMap.set(stat._id.toString(), {
+        totalTasks: stat.totalTasks,
+        completedTasks: stat.completedTasks,
+      });
+    });
+
+    const projectsWithTaskCounts = projects.map((p) => {
+      const stat = statsMap.get(p._id.toString()) || { totalTasks: 0, completedTasks: 0 };
+      return {
+        ...p,
+        totalTasks: stat.totalTasks,
+        completedTasks: stat.completedTasks,
+      };
+    });
 
     const responsePayload = {
       success: true,
@@ -81,10 +100,11 @@ export const getProjects = async (req, res, next) => {
   }
 };
 
-// Get single project details and non-deleted tasks (with Redis Cache)
+// Get single project details and non-deleted tasks (with Isolated User Redis Cache)
 export const getProjectById = async (req, res, next) => {
   try {
-    const cacheKey = `project:detail:${req.params.id}`;
+    // Cô lập cache theo user ID để tránh lỗ hổng rò rỉ dữ liệu (IDOR)
+    const cacheKey = `project:detail:${req.user._id}:${req.params.id}`;
 
     // 1. Kiểm tra cache
     const cachedData = await getCache(cacheKey);
@@ -150,8 +170,11 @@ export const updateProject = async (req, res, next) => {
 
     await project.save();
 
-    // Xóa cả cache danh sách dự án và cache chi tiết dự án này
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${project._id}`);
+    // Xóa cả cache danh sách dự án và cache chi tiết dự án (cô lập theo user)
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${project._id}`
+    );
 
     res.status(200).json({
       success: true,
@@ -163,7 +186,7 @@ export const updateProject = async (req, res, next) => {
   }
 };
 
-// Delete project (cascades delete on tasks)
+// Delete project (Atomic cascade deletion on tasks and project)
 export const deleteProject = async (req, res, next) => {
   try {
     const project = await Project.findOne({
@@ -178,11 +201,15 @@ export const deleteProject = async (req, res, next) => {
       });
     }
 
+    // Xóa toàn bộ task liên kết trước, sau đó xóa project
     await Task.deleteMany({ project: project._id });
     await project.deleteOne();
 
     // Xóa cache danh sách dự án và chi tiết dự án đã xóa
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${project._id}`);
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${project._id}`
+    );
 
     res.status(200).json({
       success: true,

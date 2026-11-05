@@ -40,8 +40,11 @@ export const createTask = async (req, res, next) => {
       deletedAt: null,
     });
 
-    // Xóa cache danh sách dự án (để cập nhật count) và chi tiết Kanban board của dự án
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${projectId}`);
+    // Xóa cache danh sách dự án (để cập nhật count) và chi tiết Kanban board của dự án (cô lập theo user)
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${projectId}`
+    );
 
     res.status(201).json({
       success: true,
@@ -113,8 +116,11 @@ export const updateTask = async (req, res, next) => {
 
     await task.save();
 
-    // Xóa cache danh sách dự án và chi tiết Kanban
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+    // Xóa cache danh sách dự án và chi tiết Kanban (cô lập theo user)
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${task.project}`
+    );
 
     res.status(200).json({
       success: true,
@@ -154,8 +160,11 @@ export const updateTaskStatus = async (req, res, next) => {
     task.status = status;
     await task.save();
 
-    // Invalidate caches (completedTasks count changed & board changed)
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+    // Invalidate caches (completedTasks count changed & board changed, cô lập theo user)
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${task.project}`
+    );
 
     res.status(200).json({
       success: true,
@@ -187,7 +196,10 @@ export const deleteTask = async (req, res, next) => {
     await task.save();
 
     // Xóa cache do task count và danh sách task trên board thay đổi
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${task.project}`
+    );
 
     res.status(200).json({
       success: true,
@@ -240,7 +252,10 @@ export const restoreTask = async (req, res, next) => {
     await task.save();
 
     // Xóa cache để khôi phục count và task trên board
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${task.project}`
+    );
 
     res.status(200).json({
       success: true,
@@ -271,7 +286,10 @@ export const deleteTaskPermanently = async (req, res, next) => {
     await task.deleteOne();
 
     // Xóa cache dự phòng
-    await delCache(`projects:user:${req.user._id}`, `project:detail:${task.project}`);
+    await delCache(
+      `projects:user:${req.user._id}`,
+      `project:detail:${req.user._id}:${task.project}`
+    );
 
     res.status(200).json({
       success: true,

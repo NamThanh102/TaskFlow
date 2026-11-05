@@ -29,5 +29,18 @@ const projectSchema = new mongoose.Schema(
   }
 );
 
+// Compound index for listing projects by user sorted by creation time
+projectSchema.index({ user: 1, createdAt: -1 });
+
+// Cascade deletion hook: automatically delete all associated tasks when a project document is deleted
+projectSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+  try {
+    await mongoose.model('Task').deleteMany({ project: this._id });
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 const Project = mongoose.model('Project', projectSchema);
 export default Project;
